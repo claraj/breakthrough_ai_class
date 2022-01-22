@@ -1,13 +1,18 @@
-from board import Board, Square, Direction
+from board import Board, Square, Direction, Move
+from computer_strategy import Computer
 
 board = Board()
+
+board.start_positions()
+
+computer = Computer()
 
 def main():
 
     print(board)
     while not game_over():
-        human_move()
         computer_move()
+        human_move()
 
 
 def human_move():
@@ -24,7 +29,7 @@ def human_move():
         else:
             break
     
-    board.move(start, destination)
+    board.move(Move(start, destination))
     print(board)
 
 
@@ -42,7 +47,7 @@ def get_square_coord(message):
             print(letter_number[1])
             row = int(letter_number[1])
 
-            row = 7 - row 
+            # row = 7 - row 
 
             if row < 0 or row > 7:
                 raise Exception('Out of range')
@@ -71,7 +76,7 @@ def computer_move():
     # decide on most advantageous move 
     # make move and update board 
     # report on piece taken, if any   
-    pass
+    computer.decide_move(board)
 
 
 
