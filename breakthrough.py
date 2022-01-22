@@ -18,13 +18,19 @@ def human_move():
     while True:
         start = get_square_coord('Enter coordinates of piece to move: ')
         destination = get_square_coord('Enter coordinates of destination to move to e.g. A2: ')
-        if valid_move(Direction.DOWN, 'H', start, destination):
+        valid, why, piece_taken = valid_move(Direction.DOWN, player='H', opponent='C', start=start, destination=destination)
+        if not valid:
+            print(f'You can\'t make that move because {why}')
+        else:
             break
     
-    board.move(start_xy, destination_xy)
+    board.move(start, destination)
+    print(board)
 
 
 def get_square_coord(message):
+
+    # don't forget to flip the Y row value (making more problems for future clara)
     while True: 
         square = input(message)
         if len(square) != 2:
@@ -35,6 +41,9 @@ def get_square_coord(message):
         try:
             print(letter_number[1])
             row = int(letter_number[1])
+
+            row = 7 - row 
+
             if row < 0 or row > 7:
                 raise Exception('Out of range')
         except: 
@@ -44,22 +53,29 @@ def get_square_coord(message):
         col_letter = letter_number[0].upper()
         col = ord(col_letter) - 65
 
-        print(f'{col:}')
         if col < 0 or col > 7:
             print(f'Letter must be one of ABCDEFGH {square} {col_letter}' )
+            continue
 
-        return Square(col, row)
+        # it must be valid 
+        break # ick
+        
+
+    square_tuple = Square(row, col)
+    print(f'{square} converted to {square_tuple}')
+    return square_tuple
 
 
 def computer_move():
     # build decision tree, evaluate state function  
-    # make move 
-    # update board 
-    # report on pieces taken?  
+    # decide on most advantageous move 
+    # make move and update board 
+    # report on piece taken, if any   
     pass
 
 
-def valid_move(direction, player, start, destination):
+
+def valid_move(direction, player, opponent, start, destination):
     # 
     # direction is UP or DOWN the board 
     # player is H or C for human or computer
@@ -73,7 +89,7 @@ def valid_move(direction, player, start, destination):
 
     # Return tuple includes the following, as appropriate 
     # ( move is valid, reason why not, piece taken )
-    return board.is_valid_move(direction, player, start, destination)
+    return board.is_valid_move(direction, player, opponent, start, destination)
 
     
 
@@ -81,7 +97,7 @@ def valid_move(direction, player, start, destination):
 def game_over():
     winner = board.game_over()
     if winner:
-        print(f'{Winner} has won')
+        print(f'{winner} has won')
 
 if __name__ == '__main__':
     main()
