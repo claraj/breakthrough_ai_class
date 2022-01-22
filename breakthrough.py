@@ -30,12 +30,12 @@ def human_move():
             break
     
     board.move(Move(start, destination))
+    if piece_taken:
+        print(f'You took the opponent piece at {piece_taken}')
     print(board)
 
 
 def get_square_coord(message):
-
-    # don't forget to flip the Y row value (making more problems for future clara)
     while True: 
         square = input(message)
         if len(square) != 2:
@@ -76,7 +76,10 @@ def computer_move():
     # decide on most advantageous move 
     # make move and update board 
     # report on piece taken, if any   
-    computer.decide_move(board)
+    move, piece_taken = computer.decide_move(board)
+    if piece_taken:
+        print(f'Computer took your piece at {piece_taken}')
+    board.make_move(move)
 
 
 

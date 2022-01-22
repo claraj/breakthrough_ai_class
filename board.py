@@ -17,7 +17,6 @@ class Direction(Enum):
     DOWN = 1  # number to add to the row to move a piece forward if the player is moving down the board
 
 
-
 class Board: 
 
     EMPTY = '0'
@@ -30,35 +29,30 @@ class Board:
         self.board = [ ( [self.EMPTY] * board_size ) for x in range(board_size) ]
 
 
-    def start_positions(self, board_size=8):
-        self.board_size = board_size
-        if board_size < 5 or board_size > 12:  # max is pretty arbitrary 
-            raise Exception('That is not a valid size.')
-
-        self.board = [ ( [self.EMPTY] * board_size ) for x in range(board_size) ]
-
+    def start_positions(self):
         # set up computer pieces on first two rows
-        for square in range(board_size):
-            self.board[0][square] = f'C{str(square+1).zfill(2)}'
-            self.board[1][square] = f'C{str(square+1+board_size).zfill(2)}'
+        for square in range(self.board_size):
+            self.board[0][square] = f'C{str(square + 1).zfill(2)}'
+            self.board[1][square] = f'C{str(square + 1 + self.board_size).zfill(2)}'
 
         # set up human pieces on last two rows 
         # label H1 through H16
-        for square in range(board_size):
-            self.board[board_size - 2][square] = f'H{str(square+1).zfill(2)}'
-            self.board[board_size - 1][square] = f'H{str(square+1+board_size).zfill(2)}'
+        for square in range(self.board_size):
+            self.board[self.board_size - 2][square] = f'H{str(square+1).zfill(2)}'
+            self.board[self.board_size - 1][square] = f'H{str(square+1+self.board_size).zfill(2)}'
 
 
     def make_new_board_with_move_made(self, move):
         new_board = Board()
         new_board_board = [] 
+        new_board.board_size = self.board_size
 
         # slicey slice 
         for row in self.board:
             new_row = row[:]
             new_board_board.append(new_row)
         
-        new_board.board = new_board_board  # NAAAAAAAAAAAAMES  If you are one of my students send me an email for extra credit if I tell you that you need to use better variable names in one of your projects
+        new_board.board = new_board_board  # NAAAAAAAAAAAAMES  If you are one of my students send me an email for extra credit next time I tell you that you need to use better variable names in one of your projects
         new_board.make_move(move)
         return new_board
 
@@ -70,7 +64,6 @@ class Board:
 
 
     def list_of_pieces(self, player):
-
         pieces = []
         for row_index, row in enumerate(self.board):
             for col_index, col in enumerate(row):
