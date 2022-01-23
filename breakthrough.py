@@ -1,5 +1,7 @@
 from board import Board, Square, Direction, Move
-from computer_strategy import Computer
+# from computer_strategy import ComputerBase
+from computer import Computer
+
 
 board = Board()
 
@@ -76,10 +78,13 @@ def computer_move():
     # decide on most advantageous move 
     # make move and update board 
     # report on piece taken, if any   
-    move, piece_taken = computer.decide_move(board)
-    if piece_taken:
-        print(f'Computer took your piece at {piece_taken}')
+    move = computer.select_move(board)
+    
+    print(move)
+    # if piece_taken:
+    #     print(f'Computer took your piece at {piece_taken}')
     board.make_move(move)
+    print(board)
 
 
 

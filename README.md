@@ -27,18 +27,30 @@ AI
 * Can generate a list of moves from a board state 
 * Can run an evaluation function 
 
- minimax - 
- alpha-beta - 
- forward pruning - 
+ minimax - best of mine, worst of opponents 
+ alpha-beta - forward pruning - getting rid of poor outcome branches
 
 
 TODO 
 
 Colours in the terminal output
 Some kind of AI evaluation function
+alpha-beta decision tree
 Clean up the data structures 
 Web based version 
     - https://skulpt.org/
     - repl.it
 
 Test it on humans
+
+
+Notes 
+
+The most number of moves there can possibly be is something like 6 * 8 = 48.  A tree with 48 levels would be rather large though. 
+
+
+Jan 22 
+
+Trash original computer and implement minmax from the book.
+
+Computer is cheating, moves a human piece lol

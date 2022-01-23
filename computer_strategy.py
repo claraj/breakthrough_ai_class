@@ -25,11 +25,11 @@ from board import Direction, Move
 
 
 directions_for_players = {
-    'H': Direction.UP,
+    'H': Direction.UP,    # always human up and computer down
     'C': Direction.DOWN
 }
 
-class Computer():
+class ComputerBase():
 
     PLAYS_AHEAD = 5   # tweak probably 
     
@@ -39,44 +39,27 @@ class Computer():
         self.current_level = 0
     
 
-    def toggle_player(self):
-        if self.player == 'C':
-            self.player = 'H'
-            self.opponent = 'C'
-        else:
-            self.player = 'C'
-            self.opponent = 'H'
-
-
     def decide_move(self, board):
         # TODO make and walk tree according to strategy 
         # TODO evaluate state function for nodes 
         # TODO return best move 
         # TODO identify similar states obtained by different moves and responses? 
 
-
-        # self.leaf_nodes = []
         self.current_level = 0
-        # self.moves_to_best_evaluation = []  
         self.best_evaluation_so_far = 0
-        self.best_evaluation_node = None
-
-        self.current_search_path = []   # A STACK A STACK A STACKSFSFOKDPRDOKRTSEPKRTGSPERQ@#$SDFSZF 
-        # never mind we can store a node's parent and go backwards to root
-
-        # self.where_can_i_go(board)
+        self.best_evaluation_node = None  # nope
 
         player = 'C'
         opponent = 'H'
+        direction = directions_for_players.get(player)
         
-        first_ply_move_nodes = self.where_can_i_go(board, player, opponent, directions_for_players.get(player))
+        first_ply_move_nodes = self.where_can_i_go(board, player, opponent, direction)
         tree = Tree(board, first_ply_move_nodes)
 
         for child_node in tree.children:
-            self.generate_next_moves(tree, 1, player, opponent)
+            self.generate_next_moves(tree, 1, player, opponent, direction)
         
         moves_to_best_evaluation = self.get_moves_to_node(self.best_evaluation_node)
-
         return moves_to_best_evaluation[0]
 
     # def pick_best_move(tree):
@@ -94,31 +77,52 @@ class Computer():
         return moves 
 
 
-    def generate_next_moves(self, node, level, player, opponent):
+    def generate_next_moves(self, node, level, player, opponent, direction):
 
         MAX_DEPTH = 5
+        print(self.current_level)
 
-        next_ply_move_nodes = self.where_can_i_go(node.board, player, opponent, directions_for_players.get(player))
+        if self.current_level % 2 == 0:
+            player = 'C'
+            opponent = 'H'
+            direction = Direction.DOWN
+        else:
+            player = 'H'
+            opponent = 'C'
+            direction = Direction.UP
+
+
+        next_ply_move_nodes = self.where_can_i_go(node.board, player, opponent, direction)
+
         node.children = next_ply_move_nodes
 
         if not next_ply_move_nodes:  # found an end-game state, someone won - or stalemate if possible? 
             # better than any other state? 
             evaluation = self.static_evaluation_function(node.board)
             if evaluation > self.best_evaluation_so_far:
+                print('found a better state', evaluation, node)
                 self.best_evaluation_so_far = evaluation
                 self.best_evaluation_node = node
+            self.current_level -= 1
+            return 
 
-        self.current_level += 1
+        
         if self.current_level > MAX_DEPTH:
-            # lowest level of dealing with this. add states to leaf_nodes 
-            # self.leaf_nodes += next_ply_move_nodes
+            evaluation = self.static_evaluation_function(node.board, player, opponent)
+            if evaluation > self.best_evaluation_so_far:
+                self.best_evaluation_so_far = evaluation
+                self.best_evaluation_node = node
+            self.current_level -= 1
             return 
 
         player, opponent = opponent, player
 
-        for child in node.children:
-            self.generate_next_moves(child, level, player, opponent)
+        self.current_level += 1
+        for child in node.children:    
+            self.generate_next_moves(child, level, player, opponent, direction)
         
+        self.current_level -= 1
+            
 
 
     def where_can_i_go(self, board, player, opponent, direction):
@@ -127,18 +131,13 @@ class Computer():
         
         # 
         # make list of valid moves for computer 
-        moves = board.list_of_valid_moves(player, opponent, direction)
+        print(player, opponent, direction)
+        winner, moves = board.list_of_valid_moves(player, opponent, direction)
 
         # print('the moves')
-        print(moves)
+        # print(moves)
+        # TODO evaluations in the range +1 to -1 where +1 is computer wins, -1 is human wins 
 
-        if len(moves) == 0:
-            # oh dear 
-            # is this possible?
-            raise Exception("Meep. There's nowhere I can move.")
-
-        # parallel "array"
-        # evaluations = [ self.static_evaluation_function(board) for move in moves]
         
         # STOP HERE and return the evaluations... as a list of NODES (oo!)
 
@@ -146,7 +145,7 @@ class Computer():
 
         for move in moves:
             board_state_on_move = board.make_new_board_with_move_made(move)
-            evaluation = self.static_evaluation_function(board_state_on_move)
+            evaluation = self.static_evaluation_function(board_state_on_move, player, opponent)
             #     def __init__(self, board, evaluation, player, parent, move):
             node = Node(board_state_on_move, evaluation, player, None, move)
             nodes.append(node)
@@ -174,7 +173,10 @@ class Computer():
     """
 
 
-    def static_evaluation_function(self, board):
+    def static_evaluation_function(self, board, player, opponent):
+
+        # Low numbers are better, 0 is a win state  
+
         # first go - how close is the nearest piece to the other side? 
         # return the distance the closest piece is to the other side
         # and the number of opponent pieces - want to minimize that too 
@@ -185,14 +187,19 @@ class Computer():
 
         distances = [] 
 
-        pieces = board.list_of_pieces('C')
+        direction = directions_for_players[player]
 
-        opponent_pieces = board.list_of_pieces('H')
+        players_pieces = board.list_of_pieces(player)  # piece is actually a Square 
+        opponent_pieces = board.list_of_pieces(opponent)
 
-        for piece in pieces:   # a piece might be in row 0 so it's at the end, or at row 2 so it's 2 from the end 
-            distances.append(piece.row)
+        if direction == Direction.DOWN: #traveling 0, 1, 2, 3... towards 7, higher numbers better  
+            for piece in players_pieces:   # a piece might be in row 0 so it's at the end, or at row 2 so it's 2 from the end 
+                distances.append(7 - piece.row)
+        elif direction == Direction.UP:  # traveling 7, 6, 5 .. 0 so lower numbers are better 
+            for piece in players_pieces:   
+                distances.append(piece.row)
 
-        return min(distances) * len(opponent_pieces)    # * ?????? 
+        return min(distances) * len(opponent_pieces)    # * ?????? The multiplication means that if a distance is 0 the whole thing is 0
 
 
 """
@@ -208,6 +215,7 @@ class Tree:
     def __init__(self, board, children):
         self.children = children  # list of nodes 
         self.board = board 
+        self.parent = None
 
 
 class Node:

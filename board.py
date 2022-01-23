@@ -19,6 +19,11 @@ class Direction(Enum):
 
 class Board: 
 
+    """ Represents the board, as the game is playing. 
+    The computer strategy class(es) use board objects for their own
+    internal representation of the board state for future move planning 
+    """
+
     EMPTY = '0'
 
     def __init__(self, board_size=8):
@@ -57,6 +62,20 @@ class Board:
         return new_board
 
 
+    def make_new_board(self):
+        new_board = Board()
+        new_board_board = [] 
+        new_board.board_size = self.board_size
+
+        # slicey slice 
+        for row in self.board:
+            new_row = row[:]
+            new_board_board.append(new_row)
+        
+        new_board.board = new_board_board  # NAAAAAAAAAAAAMES  If you are one of my students send me an email for extra credit next time I tell you that you need to use better variable names in one of your projects
+        return new_board
+
+
     def make_move(self, move):
         piece = self.board[move.start.row][move.start.col]
         self.board[move.start.row][move.start.col] = self.EMPTY
@@ -68,7 +87,7 @@ class Board:
         for row_index, row in enumerate(self.board):
             for col_index, col in enumerate(row):
                 if player in self.board[row_index][col_index]:
-                    pieces.append(Square(row, col))
+                    pieces.append(Square(row_index, col_index))
 
         return pieces
 
@@ -78,22 +97,32 @@ class Board:
         # Find locations of this player's pieces 
         # make list of possible Move objects for each piece 
         # the computer needs to decide how player could respond to computer moves so this needs to work in both directions
+        # or have two computers play each other 
+
+        # if win state, return empty list 
+        winner = self.game_over()
+        if winner:
+            return winner, []
+
+
+        # otherwise find moves 
 
         possible_moves = []
 
         pieces = []
         for row_index, row in enumerate(self.board):
-            for col_index, col in enumerate(row):
+            for col_index, square_contents in enumerate(row):
                 square = Square(row_index, col_index)
-                if player in self.contents_for_square(square):
+                # if player in self.contents_for_square(square):
+                if player in square_contents:
                     pieces.append(square)
 
         for piece in pieces:
-            print(piece)
+            # print(piece)
             if direction == Direction.DOWN and piece.row + 1 > 7:
-                raise Exception('Checking for moves off the end shoul\'nt be here since the player moving up has won.')
+                raise Exception('Checking for moves off the bottom is not valid. Shoul\'nt be here since the player moving down has won.')
             elif direction == Direction.UP and piece.row - 1 < 0:
-                raise Exception('Checking for moves off the end shoul\'nt be here since the player moving down has won.')
+                raise Exception('Checking for moves off the top is not valid. Shoul\'nt be here since the player moving up has won.')
 
             # where to? 
             # choices are forward if empty, diagonal if empty, diagonal if opponent 
@@ -120,7 +149,6 @@ class Board:
                 pass
 
             # diagonal other way
-    
             one_square_diagonal_plus = Square(piece.row + direction.value, piece.col + 1) 
             contents = self.contents_for_square(one_square_diagonal_plus) 
             if contents is None:  # off the side 
@@ -133,7 +161,12 @@ class Board:
                 # current player in square? not valid
                 pass
 
-        return possible_moves
+
+        if not possible_moves:
+            print(self)
+            raise Exception('No possible moves found and this does not seem to be a win state')
+
+        return None, possible_moves
 
 
     def contents_for_square(self, square):
@@ -142,7 +175,6 @@ class Board:
         try:
             return self.board[square.row][square.col]
         except:
-            print("NOPE")
             return None
 
 
@@ -171,7 +203,7 @@ class Board:
 
         piece = self.board[start.row][start.col]
         destination_contents = self.board[destination.row][destination.col]
-        print(piece, destination_contents, direction.value)
+        # print(piece, destination_contents, direction.value)
 
         if piece == Board.EMPTY:
             return (False, 'That starting position is an empty square.', None)
@@ -180,8 +212,6 @@ class Board:
         if player not in piece:
             return (False, 'That is not one of your pieces.', None)
 
-
-        print("DIAG", destination.row - start.row,  abs(destination.col - destination.col))
 
             # class Direction(Enum):
         #     UP = 1
@@ -194,22 +224,21 @@ class Board:
             # diagonally forward left or right 
             move_type = "DIAGONAL"
         else:
-            # nope       
+            # some other destination       
             return (False, 'You may only move ahead or diagonally ahead one square.', None)
 
 
         if move_type == "STRAIGHT":
-            # can only move into another piece 
+            # can only move into an empty space 
             if destination_contents == Board.EMPTY:
-                # ok 
-                return (True, 'Moving forward one into an empty space is cool', None)
+                return (True, 'Moving forward one into an empty space is valid', None)
             else:
                 return (False, 'You cannot move straight ahead into another piece', None)
     
 
         if move_type == 'DIAGONAL':
             if destination_contents == Board.EMPTY:
-                return (True, 'Moving diagonally forward one square into an empty space is cool.', None)
+                return (True, 'Moving diagonally forward one square into an empty space is valid.', None)
             elif player in destination_contents:
                 # that's your piece, nope
                 return (False, 'You cannot move diagonally into your own piece.', None)
@@ -217,7 +246,7 @@ class Board:
                 return (True, 'Moving diagonally forward one square to take your opponents piece is valid.', destination_contents)
             else:
                 # not empty, not yours, not the opponent
-                raise Exception('something else got onto the board. a frog? A dug? a bug? Probably a bug.')
+                raise Exception('Something else got onto the board. a frog? A dug? a bug? Probably a bug.')
 
 
     def __str__(self):
@@ -239,7 +268,6 @@ class Board:
         output += '\n'
         output += f'    {letter_string}'
         output += '\n'
-
 
         return output            
 
