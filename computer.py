@@ -63,7 +63,7 @@ class Computer():
     def minmax(self, L, first_node_called_n):
 
         self.depth += 1
-        print(self.depth)
+        # print(self.depth)
 
         # 2. let x be the first node of n.  if x = n and has a value (computed by the state evaluation function) return n        
         x = L[0]
@@ -114,7 +114,7 @@ class Computer():
                     for c in children:
                         L.appendleft(c)
                 else:  # THIS IS A TERMINAL NODE 
-                    x.evaluation = self.evaluation(x)
+                    x.evaluation = self.state_evaluation(x)
 
                 self.minmax(L, first_node_called_n)
 
@@ -125,7 +125,7 @@ class Computer():
 
         board = from_node.board
         
-        if from_node.player == 'H':  
+        if from_node.player == 'C':  
             player = 'C'
             opponent = 'H'
             direction = Direction.DOWN
@@ -136,7 +136,7 @@ class Computer():
             direction = Direction.UP
             min_max = MinMax.MIN
 
-        print(player, opponent, direction)
+        # print(player, opponent, direction)
         winner, moves = board.list_of_valid_moves(player, opponent, direction)
 
         if winner: # terminal node, someone won
@@ -156,19 +156,6 @@ class Computer():
     
     # def state_evaluation(board, player, opponent, direction):
     def state_evaluation(self, node):
-
-        # follow node's parents and make list of moves 
-        
-        # board = self.board.make_new_board()
-        # node_prt = node 
-        # moves = deque(node.move)
- 
-        # while node_ptr.parent:
-        #     node_prt = node_prt.parent 
-        #     moves.appendleft(node_ptr.move)
-
-        # for move in moves:
-        #     board.make_move(move)
 
         board = node.board
 
@@ -204,16 +191,16 @@ class Computer():
                     return 1 
                 player_distances.append(piece.row)
             for piece in opponeent_pieces: 
-                if peice.row == 0:
+                if piece.row == 0:
                     return -1  
                 player_distances.append(7 - piece.row)
 
         opp_advantage = sum(opponent_distances) * len(players_pieces)  # want small distance, small number of opponent 
         player_advantage = sum(player_distances) * len(opponent_pieces)  
 
-        # Max value can be (8 * 6) distances and 16 peices = 768
         return (opp_advantage - player_advantage) / (opp_advantage + player_advantage)  # TODO IDK
 
+        # TODO  be more enthusiastic about taking pieces 
         # TODO is it better to be in the middle of the board? What about blocking opponent? Strategies for pinning or taking opponent?
 
 

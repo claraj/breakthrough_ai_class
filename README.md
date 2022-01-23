@@ -53,4 +53,4 @@ Jan 22
 
 Trash original computer and implement minmax from the book.
 
-Computer is cheating, moves a human piece lol
+Max depth is not working correctly 

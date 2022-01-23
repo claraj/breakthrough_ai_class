@@ -32,6 +32,7 @@ class Board:
             raise Exception('That is not a valid size.')
 
         self.board = [ ( [self.EMPTY] * board_size ) for x in range(board_size) ]
+        self.most_recent_move = None 
 
 
     def start_positions(self):
@@ -80,6 +81,7 @@ class Board:
         piece = self.board[move.start.row][move.start.col]
         self.board[move.start.row][move.start.col] = self.EMPTY
         self.board[move.destination.row][move.destination.col] = piece
+        self.most_recent_move = move 
 
 
     def list_of_pieces(self, player):
@@ -251,16 +253,38 @@ class Board:
 
     def __str__(self):
 
+        GREEN = '\u001B[1;32m'
+        RESET = '\u001B[0m'
+   
+        if self.most_recent_move:
+            destination_row = self.most_recent_move.destination.row 
+            destination_col = self.most_recent_move.destination.col 
+        else: 
+            destination_col = None 
+            destination_row = None
+
         current_row = 0
         output = '\n'
         
-        for row in self.board:
+        for row_index, row in enumerate(self.board):
+
             output += f'{current_row:<4}'
             current_row += 1
 
+            # print(destination_row, row, destination_col )
+            if destination_row == row_index: 
+                piece = row[destination_col]
+                row[destination_col] = GREEN + piece + RESET
+                # print(row)
+
             r = ' '.join([ r.center(3) for r in row ])
             output += r
+            
+            if destination_row == row_index: 
+                row[destination_col] = piece
+
             output += '\n'
+
 
         # add letters to the end 
         letters = [ chr(index + 65).center(3) for index in range(self.board_size) ]

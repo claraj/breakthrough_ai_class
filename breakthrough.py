@@ -25,13 +25,13 @@ def human_move():
     while True:
         start = get_square_coord('Enter coordinates of piece to move: ')
         destination = get_square_coord('Enter coordinates of destination to move to e.g. A2: ')
-        valid, why, piece_taken = valid_move(Direction.DOWN, player='H', opponent='C', start=start, destination=destination)
+        valid, why, piece_taken = valid_move(Direction.UP, player='H', opponent='C', start=start, destination=destination)
         if not valid:
             print(f'You can\'t make that move because {why}')
         else:
             break
     
-    board.move(Move(start, destination))
+    board.make_move(Move(start, destination))
     if piece_taken:
         print(f'You took the opponent piece at {piece_taken}')
     print(board)
