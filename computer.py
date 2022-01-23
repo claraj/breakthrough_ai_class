@@ -44,7 +44,7 @@ class Computer():
         self.count_nodes = 0
 
         self.depth = 0
-        self.max_depth = 3
+        self.max_depth = 4
     
         player = 'C'
         opponent = 'H'
@@ -198,7 +198,7 @@ class Computer():
         board = node.board
         board_max_index = board.board_size 
 
-        if node.isMinMax == MinMax.MAX:
+        if node.isMinMax == MinMax.MAX:  # MAX ?? ?
             player = 'C'
             opponent = 'H'
             direction = Direction.DOWN 
@@ -241,19 +241,20 @@ class Computer():
         return evaluation
 
         # TODO  be more enthusiastic about taking pieces 
+        
         # TODO is it better to be in the middle of the board? What about blocking opponent? Strategies for pinning or taking opponent?
 
 
 class Node:
     def __init__(self, board, evaluation, isMinMax, parent, move, isTerminal, player):
-        self.board = board
+        self.board = board  # board with the move made 
         self.evaluation = evaluation
         self.isMinMax = isMinMax
         self.children = []  # more nodes - where this state can move to 
         self.parent = parent 
-        self.move = move 
+        self.move = move  # the move that lead to this node 
         self.isTerminal = isTerminal
-        self.player = player
+        self.player = player  # this is actually the opponent 
 
     def __repr__(self):
         if self.children:
