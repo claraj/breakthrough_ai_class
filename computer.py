@@ -81,7 +81,7 @@ class Computer():
             x = L[0]
 
             self.count_nodes +=1 
-            print('counted this many nodes', self.count_nodes, 'at depth', depth)
+            # print('counted this many nodes', self.count_nodes, 'at depth', depth)
 
             if x == first_node_called_n and x.evaluation:
                 depth -= 1
@@ -96,16 +96,16 @@ class Computer():
 
                 if parent is None:
                     # root node 
-                    print('back to parent node', L)
+                    # print('back to parent node', L)
                     return x 
 
                 if parent.isMinMax == MinMax.MAX:
                     parent.evaluation = max(x.evaluation, parent.evaluation)
                 else:
                     parent.evaluation = min(x.evaluation, parent.evaluation)
-                print('POP LEFT')
+                # print('POP LEFT')
                 L.popleft()   # remove from start, where x was 
-                print(f'l size {len(L)}')
+                # print(f'l size {len(L)}')
                 # depth =- 1  
                 
                 nodes_to_go_up_a_level -= 1
@@ -133,7 +133,7 @@ class Computer():
 
                 else: 
                     if x.isMinMax == MinMax.MAX:
-                        x.evaluation = -math.inf
+                        x.evaluation = -math.inf  # TODO correct way around??
                     else:
                         x.evaluation = math.inf
 
@@ -142,7 +142,7 @@ class Computer():
                     if children:
 
                         depth += 1
-                        nodes_to_go_up_a_level += len(children)
+                        nodes_to_go_up_a_level = len(children)
                         
                         for c in children:
                             L.appendleft(c)
