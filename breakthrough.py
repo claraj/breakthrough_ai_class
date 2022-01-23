@@ -3,7 +3,8 @@ from board import Board, Square, Direction, Move
 from computer import Computer
 
 
-board = Board()
+board_size = 5
+board = Board(board_size=board_size)
 
 board.start_positions()
 
@@ -44,23 +45,23 @@ def get_square_coord(message):
             print('Wrong length input ')
             continue
         letter_number = list(square)
-        print(letter_number)
+        # print(letter_number)
         try:
-            print(letter_number[1])
+            # print(letter_number[1])
             row = int(letter_number[1])
 
             # row = 7 - row 
 
-            if row < 0 or row > 7:
+            if row < 0 or row > (board_size-1):
                 raise Exception('Out of range')
         except: 
-            print('The row must be a number between 0 and 7')
+            print('The row must be a number between 0 and {board_size-1}')
             continue
 
         col_letter = letter_number[0].upper()
         col = ord(col_letter) - 65
 
-        if col < 0 or col > 7:
+        if col < 0 or col > (board_size-1):
             print(f'Letter must be one of ABCDEFGH {square} {col_letter}' )
             continue
 
@@ -69,7 +70,7 @@ def get_square_coord(message):
         
 
     square_tuple = Square(row, col)
-    print(f'{square} converted to {square_tuple}')
+    # print(f'{square} converted to {square_tuple}')
     return square_tuple
 
 
@@ -80,7 +81,7 @@ def computer_move():
     # report on piece taken, if any   
     move = computer.select_move(board)
     
-    print(move)
+    print('compter move', move)
     # if piece_taken:
     #     print(f'Computer took your piece at {piece_taken}')
     board.make_move(move)
@@ -104,7 +105,6 @@ def valid_move(direction, player, opponent, start, destination):
     # ( move is valid, reason why not, piece taken )
     return board.is_valid_move(direction, player, opponent, start, destination)
 
-    
 
 
 def game_over():

@@ -28,8 +28,8 @@ class Board:
 
     def __init__(self, board_size=8):
         self.board_size = board_size
-        if board_size < 5 or board_size > 12:  # max is pretty arbitrary 
-            raise Exception('That is not a valid size.')
+        # if board_size < 5 or board_size > 12:  # max is pretty arbitrary 
+        #     raise Exception('That is not a valid size.')
 
         self.board = [ ( [self.EMPTY] * board_size ) for x in range(board_size) ]
         self.most_recent_move = None 
@@ -121,7 +121,7 @@ class Board:
 
         for piece in pieces:
             # print(piece)
-            if direction == Direction.DOWN and piece.row + 1 > 7:
+            if direction == Direction.DOWN and piece.row + 1 > (self.board_size - 1):
                 raise Exception('Checking for moves off the bottom is not valid. Shoul\'nt be here since the player moving down has won.')
             elif direction == Direction.UP and piece.row - 1 < 0:
                 raise Exception('Checking for moves off the top is not valid. Shoul\'nt be here since the player moving up has won.')
@@ -133,7 +133,7 @@ class Board:
             # can go forward? 
 
             one_square_forward = Square(piece.row + direction.value, piece.col)
-            contents = self.contents_for_square( one_square_forward) 
+            contents = self.contents_for_square(one_square_forward) 
             if contents == Board.EMPTY:
                 possible_moves.append(Move(piece, one_square_forward))
     
@@ -173,6 +173,8 @@ class Board:
 
     def contents_for_square(self, square):
         if square.row < 0 or square.col < 0:
+            return None
+        if square.row >= self.board_size or square.col >= self.board_size:
             return None
         try:
             return self.board[square.row][square.col]
@@ -301,7 +303,7 @@ class Board:
 
         """ Return name of winner if game is over and someone has won, 
         return None otherwise """
-        if [ piece for piece in self.board[7] if 'C' in piece ]:
+        if [ piece for piece in self.board[ self.board_size -1 ] if 'C' in piece ]:
             return 'Computer'
         elif [ piece for piece in self.board[0] if 'H' in piece ]:
             return 'Human'

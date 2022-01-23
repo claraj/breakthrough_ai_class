@@ -194,7 +194,7 @@ class ComputerBase():
 
         if direction == Direction.DOWN: #traveling 0, 1, 2, 3... towards 7, higher numbers better  
             for piece in players_pieces:   # a piece might be in row 0 so it's at the end, or at row 2 so it's 2 from the end 
-                distances.append(7 - piece.row)
+                distances.append((board.board_size - 1) - piece.row)
         elif direction == Direction.UP:  # traveling 7, 6, 5 .. 0 so lower numbers are better 
             for piece in players_pieces:   
                 distances.append(piece.row)

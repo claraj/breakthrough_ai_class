@@ -31,8 +31,8 @@ If p is a minimizing node, then Vp = min(Vp, Vx).   If  p is a maximizing node, 
 """
 
 class MinMax(NamedTuple):
-    MIN = math.inf
-    MAX = -math.inf
+    MIN = 'minimizing'
+    MAX = 'maximizing'
 
 
 class Computer():
@@ -52,93 +52,111 @@ class Computer():
         
         #  1. L = {n} the unexpanded nodes in the tree
 
-        #               board, evaluation, isMinMax, parent, move, isTerminal):   // TODO revisit 
-        base_node = Node(board, None, MinMax.MAX, None, None, False, player) 
+    #               board, evaluation, isMinMax, parent, move, isTerminal, player):
+        base_node = Node(board, None, MinMax.MIN, None, None, False, opponent) 
         L = deque([base_node])
 
         node = self.minmax(L, base_node)
 
-        best_child = max(base_node.children, key=lambda x: x.evaluation)
+        if base_node.children:
+            best_child = max(base_node.children, key=lambda x: x.evaluation)
 
-        print(self.count_nodes)
-        return best_child.move
+            print(base_node.children)
+            return best_child.move
+        else:
+            print('no moves')
+            return None
 
 
     def minmax(self, L, first_node_called_n):
 
-        self.count_nodes +=1 
-        print('counted this many nodes', self.count_nodes, self.depth)
+        depth = 0
 
-        # self.depth += 1
-        # print(self.depth)
+        nodes_to_go_up_a_level = 0
 
         # 2. let x be the first node of n.  if x = n and has a value (computed by the state evaluation function) return n        
-        x = L[0]
 
-        if x == first_node_called_n and x.evaluation:
-            self.depth -= 1
-            return x 
+        while True:
 
-        # 3. if x HAS been assigned a value Vx then let p be the parent of x, and Vp the value assigned to p (the parent of x)
-        # If p is a minimizing node, then Vp = min(Vp, Vx).   If  p is a maximizing node, return max(Vp, Vx)
-        # remove x from L and return to step 2
+            x = L[0]
 
-        if x.evaluation:
-            parent = x.parent 
-            if parent.isMinMax == MinMax.MAX:
-                parent.evaluation = max(x.evaluation, parent.evaluation)
-            else:
-                parent.evaluation = min(x.evaluation, parent.evaluation)
-            L.popleft()   # remove from start, where x was 
+            self.count_nodes +=1 
+            print('counted this many nodes', self.count_nodes, 'at depth', depth)
 
-            # self.depth =- 1
-            return self.minmax(L, first_node_called_n)
+            if x == first_node_called_n and x.evaluation:
+                depth -= 1
+                return x   # effectively returning the root node 
 
-        # 4. if x HAS NOT been assigned a value   
-        #     AND this is a terminal node or are done expanding at this level, 
-        #     compute and set value Vx using state eval function
-        # goto step 2 
-        
-        else:
-            if x.isTerminal or self.depth > self.max_depth:  # TODO or we are done - see below 
-                # compute and set value 
-                x.evaluation = self.state_evaluation(x)
-                self.depth =- 1
-                return self.minmax(L, first_node_called_n)
+            # 3. if x HAS been assigned a value Vx then let p be the parent of x, and Vp the value assigned to p (the parent of x)
+            # If p is a minimizing node, then Vp = min(Vp, Vx).   If  p is a maximizing node, return max(Vp, Vx)
+            # remove x from L and return to step 2
 
-        # 5. if x HAS NOT been assigned a value and we plan to expand further 
-        #     if x is a maximizing node, set Vx to  -infinity
-        #     if x is a minimizing node, set Vx to  +infinity
-        #     Add children of X to the start of L 
-        #     Goto step 2        
+            if x.evaluation is not None:
+                parent = x.parent 
 
-            else: 
+                if parent is None:
+                    # root node 
+                    print('back to parent node', L)
+                    return x 
 
-                if x.isMinMax == MinMax.MAX:
-                    x.evaluation = -math.inf
+                if parent.isMinMax == MinMax.MAX:
+                    parent.evaluation = max(x.evaluation, parent.evaluation)
                 else:
-                    x.evaluation = math.inf
+                    parent.evaluation = min(x.evaluation, parent.evaluation)
+                print('POP LEFT')
+                L.popleft()   # remove from start, where x was 
+                print(f'l size {len(L)}')
+                # depth =- 1  
+                
+                nodes_to_go_up_a_level -= 1
+                if nodes_to_go_up_a_level == 0:
+                    depth -= 1
 
-                children = self.generate_node_children(x)
-                if children:
-                    self.depth += 1
-                    for c in children:
-                        L.appendleft(c)
-                else:  # THIS IS A TERMINAL NODE 
+                continue  # just in case..
+               
+            # 4. if x HAS NOT been assigned a value   
+            #     AND this is a terminal node or are done expanding at this level, 
+            #     compute and set value Vx using state eval function
+            # goto step 2 
+            
+            else:
+                if x.isTerminal or depth > self.max_depth:  # AND or we are done - see below 
+                    # compute and set value 
                     x.evaluation = self.state_evaluation(x)
-                    self.depth =- 1
+                    continue
+                   
+            # 5. if x HAS NOT been assigned a value and we plan to expand further 
+            #     if x is a maximizing node, set Vx to  -infinity
+            #     if x is a minimizing node, set Vx to  +infinity
+            #     Add children of X to the start of L 
+            #     Goto step 2        
 
+                else: 
+                    if x.isMinMax == MinMax.MAX:
+                        x.evaluation = -math.inf
+                    else:
+                        x.evaluation = math.inf
 
-                return self.minmax(L, first_node_called_n)
+                    children = self.generate_node_children(x)
+                    x.children = children
+                    if children:
 
-
+                        depth += 1
+                        nodes_to_go_up_a_level += len(children)
+                        
+                        for c in children:
+                            L.appendleft(c)
+                    else:  # THIS IS A TERMINAL NODE 
+                        x.isTerminal = True
+                        # x.evaluation = self.state_evaluation(x)
+                        # depth =- 1
 
 
     def generate_node_children(self, from_node):
 
         board = from_node.board
         
-        if from_node.player == 'C':  
+        if from_node.player == 'H':  
             player = 'C'
             opponent = 'H'
             direction = Direction.DOWN
@@ -151,6 +169,8 @@ class Computer():
 
         # print(player, opponent, direction)
         winner, moves = board.list_of_valid_moves(player, opponent, direction)
+        if moves == []:
+            print('NO MORE MOVES', winner)
 
         if winner: # terminal node, someone won
             from_node.isTerminal = True 
@@ -159,8 +179,8 @@ class Computer():
 
         nodes = [] 
         for move in moves:
-            #     def __init__(self, board, evaluation, isMinMax, parent, move, isTerminal):
-            node = Node(board.make_new_board(), None, min_max, from_node, move, False, player)  # TODO is terminal part  
+            #     def __init__(self, board, evaluation, isMinMax, parent, move, isTerminal, player):
+            node = Node(board.make_new_board_with_move_made(move), None, min_max, from_node, move, False, player)  # TODO is terminal part  
             nodes.append(node)
 
         from_node.children = nodes 
@@ -169,8 +189,9 @@ class Computer():
     
     # def state_evaluation(board, player, opponent, direction):
     def state_evaluation(self, node):
-
+        
         board = node.board
+        board_max_index = board.board_size 
 
         if node.isMinMax == MinMax.MAX:
             player = 'C'
@@ -189,29 +210,30 @@ class Computer():
         opponent_distances = [] 
 
         if direction == Direction.DOWN: #traveling 0, 1, 2, 3... towards 7, higher numbers better  
-            for piece in players_pieces:   # a piece might be in row 0 so it's at the end, or at row 2 so it's 2 from the end 
-                if piece.row == 0:
+            for piece in players_pieces:   
+                if piece.row == board_max_index:
                     return 1    # this is a win state, piece is at the other end 
-                player_distances.append(7 - piece.row)
-            for piece in opponeent_pieces:   
-                if piece.row == 7:
+                player_distances.append((board_max_index - 1) - piece.row)  # Add 7 if piece in row 1, add 6 if in row 1 ... Number of moves to get to end 
+            for piece in opponent_pieces:   
+                if piece.row == 0:   # opponent, traveling up, is in the last row wrt this player so opponent win
                     return -1 
-                player_distances.append(piece.row)
+                opponent_distances.append(piece.row)  
 
         elif direction == Direction.UP:  # traveling 7, 6, 5 .. 0 so lower numbers are better 
             for piece in players_pieces:   
-                if piece.row == 7:
+                if piece.row == 0:
                     return 1 
                 player_distances.append(piece.row)
-            for piece in opponeent_pieces: 
-                if piece.row == 0:
+            for piece in opponent_pieces: 
+                if piece.row == board_max_index:
                     return -1  
-                player_distances.append(7 - piece.row)
+                opponent_distances.append((board_max_index - 1) - piece.row)
 
         opp_advantage = sum(opponent_distances) * len(players_pieces)  # want small distance, small number of opponent 
         player_advantage = sum(player_distances) * len(opponent_pieces)  
 
-        return (opp_advantage - player_advantage) / (opp_advantage + player_advantage)  # TODO IDK
+        evaluation = (opp_advantage - player_advantage) / (opp_advantage + player_advantage)  # TODO IDK
+        return evaluation
 
         # TODO  be more enthusiastic about taking pieces 
         # TODO is it better to be in the middle of the board? What about blocking opponent? Strategies for pinning or taking opponent?
@@ -227,6 +249,9 @@ class Node:
         self.move = move 
         self.isTerminal = isTerminal
         self.player = player
+
+    def __repr__(self):
+        return f'eval={self.evaluation} {self.move=} {self.isMinMax} child count={len(self.children)} Terminal? {self.isTerminal}\n'
 
 
 # class Tree:
