@@ -51,6 +51,10 @@ The most number of moves there can possibly be is something like 6 * 8 = 48.  A 
 
 Jan 22 
 
-Trash original computer and implement minmax from the book.
+Trashed original computer and implement minmax from the book.
 
-Max depth is not working correctly 
+Max depth is definitely not working correctly 
+
+state_evaluation isn't particularly keen on taking opponent pieces 
+
+Keep old trees and work from node and generate more children since previous tree's work will still be valid 

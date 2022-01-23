@@ -41,8 +41,10 @@ class Computer():
 
         self.board = board.make_new_board()
 
+        self.count_nodes = 0
+
         self.depth = 0
-        self.max_depth = 10 
+        self.max_depth = 3
     
         player = 'C'
         opponent = 'H'
@@ -57,12 +59,17 @@ class Computer():
         node = self.minmax(L, base_node)
 
         best_child = max(base_node.children, key=lambda x: x.evaluation)
+
+        print(self.count_nodes)
         return best_child.move
 
 
     def minmax(self, L, first_node_called_n):
 
-        self.depth += 1
+        self.count_nodes +=1 
+        print('counted this many nodes', self.count_nodes, self.depth)
+
+        # self.depth += 1
         # print(self.depth)
 
         # 2. let x be the first node of n.  if x = n and has a value (computed by the state evaluation function) return n        
@@ -83,7 +90,9 @@ class Computer():
             else:
                 parent.evaluation = min(x.evaluation, parent.evaluation)
             L.popleft()   # remove from start, where x was 
-            self.minmax(L, first_node_called_n)
+
+            # self.depth =- 1
+            return self.minmax(L, first_node_called_n)
 
         # 4. if x HAS NOT been assigned a value   
         #     AND this is a terminal node or are done expanding at this level, 
@@ -94,7 +103,8 @@ class Computer():
             if x.isTerminal or self.depth > self.max_depth:  # TODO or we are done - see below 
                 # compute and set value 
                 x.evaluation = self.state_evaluation(x)
-                self.minmax(L, first_node_called_n)
+                self.depth =- 1
+                return self.minmax(L, first_node_called_n)
 
         # 5. if x HAS NOT been assigned a value and we plan to expand further 
         #     if x is a maximizing node, set Vx to  -infinity
@@ -111,14 +121,17 @@ class Computer():
 
                 children = self.generate_node_children(x)
                 if children:
+                    self.depth += 1
                     for c in children:
                         L.appendleft(c)
                 else:  # THIS IS A TERMINAL NODE 
                     x.evaluation = self.state_evaluation(x)
+                    self.depth =- 1
 
-                self.minmax(L, first_node_called_n)
 
-        self.depth -= 1
+                return self.minmax(L, first_node_called_n)
+
+
 
 
     def generate_node_children(self, from_node):
