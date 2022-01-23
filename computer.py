@@ -88,7 +88,7 @@ class Computer():
                 return x   # effectively returning the root node 
 
             # 3. if x HAS been assigned a value Vx then let p be the parent of x, and Vp the value assigned to p (the parent of x)
-            # If p is a minimizing node, then Vp = min(Vp, Vx).   If  p is a maximizing node, return max(Vp, Vx)
+            # If p is a minimizing node, then Vp = min(Vp, Vx).   If  p is a maximizing node, set Vp to  max(Vp, Vx)
             # remove x from L and return to step 2
 
             if x.evaluation is not None:
@@ -120,6 +120,11 @@ class Computer():
             # goto step 2 
             
             else:
+
+                children = self.generate_node_children(x)
+                if not children:
+                    x.isTerminal = True    
+                
                 if x.isTerminal or depth > self.max_depth:  # AND or we are done - see below 
                     # compute and set value 
                     x.evaluation = self.state_evaluation(x)
@@ -133,11 +138,11 @@ class Computer():
 
                 else: 
                     if x.isMinMax == MinMax.MAX:
-                        x.evaluation = -math.inf  # TODO correct way around??
+                        x.evaluation = -math.inf  
                     else:
                         x.evaluation = math.inf
 
-                    children = self.generate_node_children(x)
+                    # children = self.generate_node_children(x)
                     x.children = children
                     if children:
 
@@ -146,10 +151,10 @@ class Computer():
                         
                         for c in children:
                             L.appendleft(c)
-                    else:  # THIS IS A TERMINAL NODE 
-                        x.isTerminal = True
-                        # x.evaluation = self.state_evaluation(x)
-                        # depth =- 1
+                    # else:  # THIS IS A TERMINAL NODE 
+                    #     x.isTerminal = True
+                    #     # x.evaluation = self.state_evaluation(x)
+                    #     # depth =- 1
 
 
     def generate_node_children(self, from_node):
@@ -251,7 +256,11 @@ class Node:
         self.player = player
 
     def __repr__(self):
-        return f'eval={self.evaluation} {self.move=} {self.isMinMax} child count={len(self.children)} Terminal? {self.isTerminal}\n'
+        if self.children:
+            c = len(self.children)
+        else:
+            c = 0
+        return f'eval={self.evaluation} {self.move=} {self.isMinMax} child count={c} Terminal? {self.isTerminal}\n'
 
 
 # class Tree:
