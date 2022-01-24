@@ -255,8 +255,12 @@ class Board:
 
     def __str__(self):
 
-        GREEN = '\u001B[1;32m'
+        YELLOW = '\u001B[1;33m'
         RESET = '\u001B[0m'
+
+        RED = '\u001B[1;31m'
+        BLUE = '\u001B[1;36m'  #cyan
+        
    
         if self.most_recent_move:
             destination_row = self.most_recent_move.destination.row 
@@ -273,18 +277,37 @@ class Board:
             output += f'{current_row:<4}'
             current_row += 1
 
+            to_color = row[:]  # copy 
+
+            # # print(destination_row, row, destination_col )
+            # if destination_row == row_index: 
+            #     piece = row[destination_col]
+            #     row[destination_col] = GREEN + piece + RESET
+            #     # print(row)
+
+            # r = ' '.join([ r.center(3) for r in row ])
+            # output += r
+            
+            # if destination_row == row_index: 
+            #     row[destination_col] = piece
+
             # print(destination_row, row, destination_col )
-            if destination_row == row_index: 
-                piece = row[destination_col]
-                row[destination_col] = GREEN + piece + RESET
+
+            for i, c in enumerate(to_color):
+                if destination_row == row_index and destination_col == i: 
+                    to_color[i] = YELLOW + c + RESET
+                elif 'C' in c:
+                    to_color[i] = BLUE + c + RESET
+                elif 'H' in c:
+                    to_color[i] = RED + c + RESET
+
                 # print(row)
 
-            r = ' '.join([ r.center(3) for r in row ])
+            r = ' '.join([ r.center(3) for r in to_color ])
             output += r
             
-            if destination_row == row_index: 
-                row[destination_col] = piece
-
+            # if destination_row == row_index: 
+            #     row[destination_col] = piece
             output += '\n'
 
 

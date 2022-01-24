@@ -175,17 +175,18 @@ class Computer():
         # print(player, opponent, direction)
         winner, moves = board.list_of_valid_moves(player, opponent, direction)
         if moves == []:
-            print('NO MORE MOVES', winner)
+            # print('NO MORE MOVES', winner)
+            pass
 
         if winner: # terminal node, someone won
-            from_node.isTerminal = True 
-            from_node.children = [] 
+            # from_node.isTerminal = True 
+            # from_node.children = [] 
             return 
 
         nodes = [] 
         for move in moves:
             #     def __init__(self, board, evaluation, isMinMax, parent, move, isTerminal, player):
-            node = Node(board.make_new_board_with_move_made(move), None, min_max, from_node, move, False, player)  # TODO is terminal part  
+            node = Node(board.make_new_board_with_move_made(move), None, min_max, from_node, move, False, opponent)  # TODO is terminal part  
             nodes.append(node)
 
         from_node.children = nodes 
@@ -196,7 +197,7 @@ class Computer():
     def state_evaluation(self, node):
         
         board = node.board
-        board_max_index = board.board_size 
+        board_max_index = board.board_size - 1
 
         if node.isMinMax == MinMax.MAX:  # MAX ?? ?
             player = 'C'
@@ -241,7 +242,7 @@ class Computer():
         return evaluation
 
         # TODO  be more enthusiastic about taking pieces 
-        
+
         # TODO is it better to be in the middle of the board? What about blocking opponent? Strategies for pinning or taking opponent?
 
 
@@ -262,9 +263,3 @@ class Node:
         else:
             c = 0
         return f'eval={self.evaluation} {self.move=} {self.isMinMax} child count={c} Terminal? {self.isTerminal}\n'
-
-
-# class Tree:
-#     def __init__(self, children):
-#         self.children = children  # list of nodes 
-#         self.parent = None

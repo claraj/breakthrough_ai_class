@@ -15,7 +15,8 @@ def main():
     print(board)
     while not game_over():
         computer_move()
-        human_move()
+        if not game_over():           
+            human_move()
 
 
 def human_move():
@@ -111,6 +112,8 @@ def game_over():
     winner = board.game_over()
     if winner:
         print(f'{winner} has won')
+        return True 
+    
 
 if __name__ == '__main__':
     main()
