@@ -3,7 +3,7 @@ from board import Board, Square, Direction, Move
 from computer import Computer
 
 
-board_size = 5
+board_size = 8
 board = Board(board_size=board_size)
 
 board.start_positions()

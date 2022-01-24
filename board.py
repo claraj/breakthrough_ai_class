@@ -39,12 +39,12 @@ class Board:
         # set up computer pieces on first two rows
         for square in range(self.board_size):
             self.board[0][square] = f'C{str(square + 1).zfill(2)}'
-            self.board[1][square] = f'C{str(square + 1 + self.board_size).zfill(2)}'
+            # self.board[1][square] = f'C{str(square + 1 + self.board_size).zfill(2)}'
 
         # set up human pieces on last two rows 
         # label H1 through H16
         for square in range(self.board_size):
-            self.board[self.board_size - 2][square] = f'H{str(square+1).zfill(2)}'
+            # self.board[self.board_size - 2][square] = f'H{str(square+1).zfill(2)}'
             self.board[self.board_size - 1][square] = f'H{str(square+1+self.board_size).zfill(2)}'
 
 
@@ -256,10 +256,11 @@ class Board:
     def __str__(self):
 
         YELLOW = '\u001B[1;33m'
+        GREEN = '\u001B[1;32m'
         RESET = '\u001B[0m'
 
         RED = '\u001B[1;31m'
-        BLUE = '\u001B[1;36m'  #cyan
+        BLUE = '\u001B[1;36m'  # well, cyan
         
    
         if self.most_recent_move:
@@ -294,8 +295,13 @@ class Board:
             # print(destination_row, row, destination_col )
 
             for i, c in enumerate(to_color):
-                if destination_row == row_index and destination_col == i: 
-                    to_color[i] = YELLOW + c + RESET
+                if destination_row == row_index and destination_col == i:
+                    if 'H' in c:
+                        to_color[i] = YELLOW + c + RESET
+                    if 'C' in c:
+                        to_color[i] = GREEN + c + RESET
+
+
                 elif 'C' in c:
                     to_color[i] = BLUE + c + RESET
                 elif 'H' in c:

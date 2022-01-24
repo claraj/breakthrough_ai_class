@@ -44,7 +44,7 @@ class Computer():
         self.count_nodes = 0
 
         self.depth = 0
-        self.max_depth = 4
+        self.max_depth = 2
     
         player = 'C'
         opponent = 'H'
@@ -60,7 +60,6 @@ class Computer():
 
         if base_node.children:
             best_child = max(base_node.children, key=lambda x: x.evaluation)
-
             print(base_node.children)
             return best_child.move
         else:
@@ -94,20 +93,13 @@ class Computer():
             if x.evaluation is not None:
                 parent = x.parent 
 
-                if parent is None:
-                    # root node 
-                    # print('back to parent node', L)
-                    return x 
-
                 if parent.isMinMax == MinMax.MAX:
                     parent.evaluation = max(x.evaluation, parent.evaluation)
                 else:
                     parent.evaluation = min(x.evaluation, parent.evaluation)
-                # print('POP LEFT')
+
                 L.popleft()   # remove from start, where x was 
-                # print(f'l size {len(L)}')
-                # depth =- 1  
-                
+
                 nodes_to_go_up_a_level -= 1
                 if nodes_to_go_up_a_level == 0:
                     depth -= 1
@@ -120,13 +112,11 @@ class Computer():
             # goto step 2 
             
             else:
-
                 children = self.generate_node_children(x)
                 if not children:
                     x.isTerminal = True    
                 
-                if x.isTerminal or depth > self.max_depth:  # AND or we are done - see below 
-                    # compute and set value 
+                if x.isTerminal or depth > self.max_depth:  
                     x.evaluation = self.state_evaluation(x)
                     continue
                    
@@ -142,19 +132,14 @@ class Computer():
                     else:
                         x.evaluation = math.inf
 
-                    # children = self.generate_node_children(x)
                     x.children = children
                     if children:
-
                         depth += 1
                         nodes_to_go_up_a_level = len(children)
                         
                         for c in children:
                             L.appendleft(c)
-                    # else:  # THIS IS A TERMINAL NODE 
-                    #     x.isTerminal = True
-                    #     # x.evaluation = self.state_evaluation(x)
-                    #     # depth =- 1
+
 
 
     def generate_node_children(self, from_node):
@@ -239,11 +224,13 @@ class Computer():
         player_advantage = sum(player_distances) * len(opponent_pieces)  
 
         evaluation = (opp_advantage - player_advantage) / (opp_advantage + player_advantage)  # TODO IDK
+        print('evaluation', evaluation, node)
         return evaluation
 
         # TODO  be more enthusiastic about taking pieces 
 
         # TODO is it better to be in the middle of the board? What about blocking opponent? Strategies for pinning or taking opponent?
+        # TODO avoid moving into a place where can be taken by opponent 
 
 
 class Node:
